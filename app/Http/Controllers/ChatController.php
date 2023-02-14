@@ -2,16 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use App\Models\Chat;
 use App\Models\User;
+use App\Models\Group;
 use Illuminate\Http\Request;
-use Carbon\Carbon;
 
 class ChatController extends Controller
 {
     //home page
     public function home()
     {
+        ddd(Group::all());
         $user = User::find(auth()->user()->id);
 
         $user_id = auth()->user()->id;
