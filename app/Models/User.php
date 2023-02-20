@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Models\Chat;
+use App\Models\Group;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -45,6 +46,15 @@ class User extends Authenticatable
             ''
         );
     }
+
+    public function groups()
+    {
+        return $this->belongsToMany(Group::class);
+    }
+
+    // public function getMessageForEachGroups(){
+    //     return User::find($this->id)->groups()->orderBy('group_name')->get()->chat()->latest()->first(); 
+    // }
 
     /**
      * The attributes that should be hidden for serialization.

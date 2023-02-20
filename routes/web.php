@@ -27,9 +27,21 @@ Route::middleware(['guest'])->group(function () {
 //auth middleware -> authenticated user
 Route::middleware(['auth'])->group(function () {
     Route::get('/home', [ChatController::class, 'home'])->name('home');
-    Route::get('/chat/{id}', [ChatController::class, 'showChat'])->name('showChat');
+    Route::get('/chat/{id}/{group?}', [ChatController::class, 'showChat'])->name('showChat');
     Route::post('/storeChat', [ChatController::class, 'storeChat'])->name('storeChat');
-    Route::post('/fetchChat/{id}', [ChatController::class, 'fetchChat'])->name('fetchChat');
+    Route::get('/createGroup', [ChatController::class, 'createGroup'])->name('createGroup');
+    Route::post('/storeGroup', [ChatController::class, 'storeGroup'])->name('storeGroup');
+    Route::post('/addUserInAGroup/{group_id}', [ChatController::class, 'addUserInAGroup'])->name('addUserInAGroup');
+    Route::delete('/leaveInAGroup/{group_id}', [ChatController::class, 'leaveInAGroup'])->name('leaveInAGroup');
+    Route::post('/fetchChat/{id}/{group?}', [ChatController::class, 'fetchChat'])->name('fetchChat');
     Route::post('/fetchChatPerUser', [ChatController::class, 'fetchChatPerUser'])->name('fetchChatPerUser');
     Route::post('/logout', [UserController::class, 'logout'])->name('logout');
+    //test
+    Route::get('/user/{id}/{name?}', function ($id, $name = null) {
+        if ($name) {
+            echo "$name $id";
+        } else {
+            echo $id;
+        }
+    })->whereNumber('id');
 });
