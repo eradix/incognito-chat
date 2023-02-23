@@ -12,7 +12,7 @@
                 </div>
                 <div id="membersList" class="border border-slate-700 mb-5 hidden">
                     @foreach ($receiverInfo->members()->orderBy('name')->get() as $member)
-                        <div class="flex gap-3 p-5 hover:bg-slate-300 cursor-pointer">
+                        <div class="flex gap-3 py-5 px-10 hover:bg-slate-300 cursor-pointer">
                             <div class="">
                                 <a href="{{ $member->id != auth()->user()->id ? route('showChat', $member->id) : '' }}" >
                                     @if ($member->profile_image)
@@ -43,13 +43,13 @@
                             </div>
                         </div>
                     @endforeach
-                    <div class="flex gap-3 p-5 flex-col">
+                    <div class="flex gap-3 py-5 px-10 flex-col">
                         <a class="font-bold hover:text-slate-700 cursor-pointer" id="addNewUser"><i class="fa-solid fa-user-plus"></i> Add User</a>
                         <div id="addForm" class="hidden">
                             <form action="{{route('addUserInAGroup', $receiverInfo->id)}}" method="post" class="">
                                 @csrf
                                 <div class="mb-3">
-                                   <select name="user_id" id="user_id" class="rounded p-2 w-full border">
+                                   <select name="user_id" id="user_id" class="rounded p-2 w-full border" required>
                                         <option disabled="true" selected="selected">Add user to group</option>
                                     @foreach ($notMembers as $notMember)
                                         <option value="{{ $notMember->id }}">{{ $notMember->name }}</option>
@@ -81,7 +81,7 @@
                 {{-- header --}}
                
                 <div class="flex gap-3 justify-center">
-                    <a class="text-xl pt-1" href="{{route('home')}}"><i class="fa-solid fa-arrow-left-long"></i></a>
+                    <a class="text-xl pt-1" href="{{ url()->previous() }}"><i class="fa-solid fa-arrow-left-long"></i></a>
                     <div class="flex gap-3">
                         <div class="div text-2xl">
                             @if ( $receiverInfo->profile_image)

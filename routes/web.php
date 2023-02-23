@@ -36,12 +36,4 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/fetchChat/{id}/{group?}', [ChatController::class, 'fetchChat'])->name('fetchChat');
     Route::post('/fetchChatPerUser', [ChatController::class, 'fetchChatPerUser'])->name('fetchChatPerUser');
     Route::post('/logout', [UserController::class, 'logout'])->name('logout');
-    //test
-    Route::get('/user/{id}/{name?}', function ($id, $name = null) {
-        if ($name) {
-            echo "$name $id";
-        } else {
-            echo $id;
-        }
-    })->whereNumber('id');
 });

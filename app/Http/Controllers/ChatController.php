@@ -78,6 +78,7 @@ class ChatController extends Controller
             $group_msg =  $group->chat()->latest()->first();
             $members = $group->members;
 
+            //check if group chat already has a message
             if (null != $group_msg) {
 
                 $now = new Carbon();
@@ -98,7 +99,7 @@ class ChatController extends Controller
                     'orig_date' =>  $group_msg->created_at,
                     'profile_image' => '',
                     'image_name' => $group->imageName(),
-                    'hasRead' => ($group_msg->hasRead == 2 &&  $group_msg->sender_id != $user_id) ? "unread" : "",
+                    'hasRead' => (!in_array($user_id, explode(",", $group_msg->groupRead)) &&  $group_msg->sender_id != $user_id) ? "unread" : "",
                 ];
             } else {
                 $group_arr = [
@@ -149,6 +150,17 @@ class ChatController extends Controller
                 $chats = Group::find($id)->chat; //all chats in the group
                 $receiverInfo = Group::find($id);
                 $notMembers = User::whereNotIn('id', $group_members->pluck('id'))->orderBy('name')->get();
+                //update the groupRead/has read for group chats
+                foreach ($chats as $chat) {
+                    $hasRead = $chat->groupRead ? explode(',', $chat->groupRead) : [];
+                    if (!in_array($user_id, $hasRead)) {
+                        $hasRead[] = $user_id;
+                        $newGroupRead = implode(',', $hasRead);
+
+                        //update the groupRead field
+                        Chat::where('chat_id', $chat->chat_id)->update(['groupRead' => $newGroupRead]);
+                    }
+                }
             } else {
                 return abort(404);
             }
@@ -194,13 +206,14 @@ class ChatController extends Controller
     //send chat/message
     public function storeChat(Request $request)
     {
+
         $data = $request->validate([
             'message' => 'required',
             'receiver_id' => 'sometimes',
             'group_id' => 'sometimes'
         ]);
 
-        $data['hasRead'] = 2; //set to unread
+        $data['hasRead'] = $data['receiver_id'] ? 2 : null; //set to unread if direct message, null if group chat
         $data['sender_id'] = auth()->user()->id;
 
         Chat::create($data);
@@ -286,7 +299,6 @@ class ChatController extends Controller
     }
 
 
-
     //fetch the newest chat realtime
     public function fetchChat($id, $group = null)
     {
@@ -302,6 +314,17 @@ class ChatController extends Controller
                 $group_infos = $chats->map(function ($chat) {
                     return ['name' => $chat->sender->name, 'profile_image' => $chat->sender->profile_image, 'imageName' => $chat->sender->imageName()];
                 });
+
+                foreach ($chats as $chat) {
+                    $hasRead = $chat->groupRead ? explode(',', $chat->groupRead) : [];
+                    if (!in_array($user_id, $hasRead)) {
+                        $hasRead[] = $user_id;
+                        $newGroupRead = implode(',', $hasRead);
+
+                        //update the groupRead field
+                        Chat::where('chat_id', $chat->chat_id)->update(['groupRead' => $newGroupRead]);
+                    }
+                }
             } else {
                 return abort(404);
             }
@@ -416,7 +439,7 @@ class ChatController extends Controller
                 'orig_date' =>  $group_msg->created_at,
                 'profile_image' => '',
                 'image_name' => $group->imageName(),
-                'hasRead' => ($group_msg->hasRead == 2 &&  $group_msg->sender_id != $user_id) ? "unread" : "",
+                'hasRead' => (!in_array($user_id, explode(",", $group_msg->groupRead)) &&  $group_msg->sender_id != $user_id) ? "unread" : "",
             ];
 
             $latest_messages[] =  $group_arr;

@@ -52,9 +52,6 @@ class User extends Authenticatable
         return $this->belongsToMany(Group::class);
     }
 
-    // public function getMessageForEachGroups(){
-    //     return User::find($this->id)->groups()->orderBy('group_name')->get()->chat()->latest()->first(); 
-    // }
 
     /**
      * The attributes that should be hidden for serialization.
