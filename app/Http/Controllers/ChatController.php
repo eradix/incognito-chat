@@ -216,9 +216,40 @@ class ChatController extends Controller
         $data['hasRead'] = $data['receiver_id'] ? 2 : null; //set to unread if direct message, null if group chat
         $data['sender_id'] = auth()->user()->id;
 
-        Chat::create($data);
+        $chat = Chat::create($data);
 
-        return  response()->json(['message' => "Created successfully"]);
+        return  response()->json(['message' => "Created successfully", 'chat' => $chat]);
+    }
+
+    //update chat/message
+    public function updateChat(Request $request)
+    {
+
+        $data = $request->validate([
+            'message' => 'required',
+            'receiver_id' => 'sometimes',
+            'group_id' => 'sometimes',
+            'chat_id' => 'required'
+        ]);
+
+        //update chat
+        Chat::where('chat_id', $data['chat_id'])->update($data);
+
+        return  response()->json(['message' => "updated successfully"]);
+    }
+
+    //delete chat/message
+    public function deleteChatMsg(Request $request)
+    {
+
+        $data = $request->validate([
+            'chat_id' => 'required'
+        ]);
+
+        //update chat
+        Chat::where('chat_id', $data['chat_id'])->delete();
+
+        return  response()->json(['message' => "deleted successfully"]);
     }
 
     //show create group page
@@ -335,15 +366,25 @@ class ChatController extends Controller
                 return abort(404);
             }
 
-            $chats = Chat::where(function ($query) use ($user_id, $other_user_id) {
-                $query->where('sender_id', $user_id)
-                    ->where('receiver_id', $other_user_id);
-            })->orWhere(function ($query) use ($user_id, $other_user_id) {
-                $query->where('sender_id', $other_user_id)
-                    ->where('receiver_id', $user_id);
-            })->get();
+            $received = User::find($user_id)->receivedMessages()->where('sender_id', $other_user_id)->get();
+            $sent = User::find($user_id)->sentMessages()->where('receiver_id', $other_user_id)->get();
 
-            $chats = $chats->sortBy('created_at');
+            //merge two messages between the user and the receiver
+            $messages = $sent->concat($received)->sortBy('created_at');
+
+            $chats = [];
+            $i = 0;
+            foreach ($messages as $message) {
+                $chats[$i]['chat_id'] = $message->chat_id;
+                $chats[$i]['sender_id'] = $message->sender_id;
+                $chats[$i]['receiver_id'] = $message->receiver_id;
+                $chats[$i]['message'] = $message->message;
+                $chats[$i]['hasRead'] = $message->hasRead;
+                $chats[$i]['created_at'] = $message->created_at;
+                $chats[$i]['group_id'] = $message->group_id;
+                $chats[$i]['groupRead'] = $message->groupRead;
+                $i++;
+            }
 
             //update status to read
             Chat::where('sender_id', $other_user_id)

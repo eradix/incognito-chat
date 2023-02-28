@@ -2,7 +2,6 @@
     use Carbon\Carbon;
 @endphp
 
-
 <x-layout :page="$page">
     <div class="grid justify-items-stretch text-slate-100">
         <div class="justify-self-center mt-24 bg-slate-200 text-slate-800 py-10 px-7 md:px-16 w-4/5 md:w-auto">
@@ -46,7 +45,7 @@
                     <div class="flex gap-3 py-5 px-10 flex-col">
                         <a class="font-bold hover:text-slate-700 cursor-pointer" id="addNewUser"><i class="fa-solid fa-user-plus"></i> Add User</a>
                         <div id="addForm" class="hidden">
-                            <form action="{{route('addUserInAGroup', $receiverInfo->id)}}" method="post" class="">
+                            <form action="{{route('addUserInAGroup', $receiverInfo->id)}}" method="post" id="addUserInAGroupForm">
                                 @csrf
                                 <div class="mb-3">
                                    <select name="user_id" id="user_id" class="rounded p-2 w-full border" required>
@@ -62,7 +61,7 @@
                                        <p class="italic">{{ $message }}</p>
                                     </div>
                                @enderror
-                               <input type="submit" value=" Add user" class="w-full bg-slate-900 hover:bg-slate-800 cursor-pointer text-slate-100 hover:text-white px-5 py-2 rounded mb-3">
+                               <input type="button" value="Add user" onclick="submitAddUserForm()" class="w-full bg-slate-900 hover:bg-slate-800 cursor-pointer text-slate-100 hover:text-white px-5 py-2 rounded mb-3">
                             </form>
                         </div>
                         <div>
@@ -81,7 +80,7 @@
                 {{-- header --}}
                
                 <div class="flex gap-3 justify-center">
-                    <a class="text-xl pt-1" href="{{ url()->previous() }}"><i class="fa-solid fa-arrow-left-long"></i></a>
+                    <a class="text-xl pt-1" href="{{ route('home') }}"><i class="fa-solid fa-arrow-left-long"></i></a>
                     <div class="flex gap-3">
                         <div class="div text-2xl">
                             @if ( $receiverInfo->profile_image)
@@ -124,10 +123,23 @@
                         @endphp
 
                         @if ($chat->sender->name == auth()->user()->name)
-                            <div class="mb-5 text-right">
+                            <div id="options_{{$chat->chat_id}}" class="text-right selfOptions ease-in-out duration-300">
+                                <div class="">
+                                    <span class="cursor-pointer hover:text-slate-700" data-id="{{$chat->chat_id}}" onclick="edit(this)"><i class="fa-solid fa-pen"></i></span>
+                                    &emsp;<span class="cursor-pointer hover:text-red-800" data-id="{{$chat->chat_id}}" onclick="deleteMsg(this)"><i class="fa-regular fa-trash-can"></i></a>
+                                </div>
+                            </div>
+                            <div id="{{"chat_" . $chat->chat_id}}" class="mb-5 text-right selfMessage ease-in-out duration-300">
                                 <div class="inline-block text-left bg-slate-900 text-slate-100 py-2 px-5 rounded">
                                     <p class="block text-xs">{{$differenceInDays < 1 ? $chat->created_at->format('h:i A') : $created_at->format("m/d") . " " . $chat->created_at->format('h:i A') }}</p>
-                                    <p class="block text-sm md:text-base">{{ $chat->message }}</p>
+                                    <p id="p_{{$chat->chat_id}}" class="block text-sm md:text-base">{{ $chat->message }}</p>
+                                </div>
+                            </div>
+                            <div class="mb-5 text-right hidden" id="form_{{$chat->chat_id}}">
+                                <div class="inline-block text-left py-2 px-5 rounded">
+                                    <input type="text" name="message" id="message_{{$chat->chat_id}}" class="rounded p-2 w-full mb-3">
+                                    <input data-id="{{$chat->chat_id}}" type="button" value="Update" class="bg-slate-900 hover:bg-slate-800 cursor-pointer text-slate-100 hover:text-white px-5 py-2 rounded" onclick="updateChat(this)">
+                                    <input data-id="{{$chat->chat_id}}" type="button" id="cancel_${chat.id}" value="Cancel" class="bg-slate-100 hover:bg-slate-50 cursor-pointer text-slate-900 hover:text-slate-800 px-5 py-2 rounded" onclick="cancelEdit(this)">
                                 </div>
                             </div>
                         @else
@@ -179,169 +191,15 @@
         </div>
     </div>
 
-    <script>
+    {{-- javascript components --}}
 
-        //automatically scroll down to the latest message
-        $('#messageBody').scrollTop($('#messageBody')[0].scrollHeight);
+    {{-- utility functions such as in adding group page --}}
+    <x-scripts.utils />
 
-        //view members button
-        $("#viewMembers").click(function(){
-            $("#membersList").fadeToggle();
-        });
+    {{-- component script for displaying newly created chat --}}
+    <x-scripts.fetch-chat :isGroup="$isGroup" :id="$receiverInfo->id" />
 
-        //addNewUser
-        $("#addNewUser").click(function (){
-            $("#addForm").fadeToggle();
-        });
-
-        //function to send chat via ajax to db
-        document.querySelector("#sendBtn").addEventListener('click', ()=>{
-
-            let message = $("#message").val();
-            let receiver_id = null;
-            let group_id = null;
-            @if (!$isGroup) {
-                receiver_id = {{ $receiverInfo->id }};
-            }
-            @else
-                group_id = {{ $receiverInfo->id }};
-            @endif
-
-            console.log(message, receiver_id, group_id);
-
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                }
-            });
-
-            $.ajax({
-
-                url: "{{ route('storeChat') }}",
-                type: 'post',
-                data: { message: message, receiver_id : receiver_id, group_id : group_id },
-
-                success: function (response) {
-                    $("#message").val("");
-
-                    let hoursMin = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-
-                    $("#messageBody").append(`
-                        <div class="mb-5 text-right">
-                            <div class="inline-block text-left bg-slate-900 text-slate-100 py-2 px-5 rounded">
-                                <p class="block text-xs">${hoursMin}</p>
-                                <p class="block text-sm md:text-base">${message}</p>
-                            </div>
-                        </div>
-                    `);
-                    //automatically scroll down to the latest message
-                    $('#messageBody').scrollTop($('#messageBody')[0].scrollHeight);
-                    
-                },
-            });
-        });
-        
-        setInterval(function () {
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                }
-            });
-
-            $.ajax({
-                url: '{{ route("fetchChat", [$receiverInfo->id, ($isGroup) ? "group" : null ]) }}',
-                type: 'post',
-                success: function (response) {
-                    let groupInfos = response.groupInfos;
-                    let chats = response.chats;
-                    let isGroup = response.isGroup;
-                    let receiverInfo = "{{$receiverInfo->profile_image ?? ''}}";
-                    let otherUserImage = (receiverInfo) ? "{{ asset('storage/' . $receiverInfo->profile_image) }}" : "https://via.placeholder.com/100/0f172a/ccc.png?text={{$receiverInfo->imageName()}}";
-
-                    let messageBody = $('#messageBody');
-                    let isScrolledToBottom = messageBody.scrollTop() + messageBody.innerHeight() >= messageBody[0].scrollHeight;
-
-                    if(chats.length > 0) {
-                        $("#messageBody").empty();
-                        chats.map((chat,index) =>{
-                            let now = new Date();
-                            let created_at = new Date(chat.created_at);
-                            let hoursMin = created_at.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-                            let differenceInDays;
-                            //compute date or time to display in chat
-                            if (created_at.toDateString() === now.toDateString()) {
-                                differenceInDays = 0;
-                            } 
-                            else{
-                                let differenceInTime = now.getTime() - created_at.getTime();
-                                differenceInDays = Math.ceil(differenceInTime / (1000 * 60 * 60 * 24));
-                            }
-
-
-                            let formattedDate = created_at.toLocaleString("default", { month: "2-digit", day: "2-digit" });
-                            let otherUserImageInGroup;
-                            if(isGroup){
-                                otherUserImageInGroup = (groupInfos[index].profile_image) ? "{{ asset('storage/')}}/" + groupInfos[index].profile_image : `https://via.placeholder.com/100/0f172a/ccc.png?text=${groupInfos[index].imageName}`;
-                            }
-                           
-                                                        
-                            if (chat.sender_id == {{auth()->user()->id}}){
-                                $("#messageBody").append(`
-                                <div class="mb-5 text-right">
-                                    <div class="inline-block text-left bg-slate-900 text-slate-100 py-2 px-5 rounded">
-                                        <p class="block text-xs">${differenceInDays < 1 ? hoursMin : `${formattedDate} ${hoursMin} `}</p>
-                                        <p class="block text-sm md:text-base">${chat.message}</p>
-                                    </div>
-                                </div>
-                                
-                                `); 
-                            }
-                            else{
-                                if(isGroup){
-                                    $("#messageBody").append(`
-                                        <div class="flex gap-3">
-                                            <div>
-                                                <img class="h-10 md:h-16 w-12 md:w-16 object-cover rounded-full" src="${otherUserImageInGroup}" alt="Current profile photo" />
-                                            </div>
-                        
-                                            <div class="bg-slate-300 text-slate-900 px-5 py-2 rounded mb-5">
-                                                <p class="font-bold mb-2">${groupInfos[index].name} <span class="text-xs">${differenceInDays < 1 ? hoursMin : `${formattedDate} ${hoursMin} `}</span></p>
-                                                <p class=""><span class="text-sm md:text-base">${chat.message}</span></p>
-                                            </div>
-                                        </div>
-                                
-                                `); 
-                                }
-                                else{
-                                    $("#messageBody").append(`
-                                        <div class="flex gap-3">
-                                            <div>
-                                                <img class="h-10 md:h-16 w-12 md:w-16 object-cover rounded-full" src="${otherUserImage}" alt="Current profile photo" />
-                                            </div>
-                        
-                                            <div class="bg-slate-300 text-slate-900 px-5 py-2 rounded mb-5">
-                                                <p class="font-bold mb-2">{{ $receiverInfo->name }} <span class="text-xs">${differenceInDays < 1 ? hoursMin : `${formattedDate} ${hoursMin} `}</span></p>
-                                                <p class=""><span class="text-sm md:text-base">${chat.message}</span></p>
-                                            </div>
-                                        </div>
-                                
-                                `); 
-                                }
-                            }
-                        });
-
-                        if (!isScrolledToBottom) {
-                            return;
-                        }
-
-                        $('#messageBody').scrollTop($('#messageBody')[0].scrollHeight);
-
-                        
-                    }
-                }
-            });
-        }, 1000);
-    </script>
-
+    {{-- component for checking realtime chats in db, edit and deleting chats --}}
+    <x-scripts.edit-delete :isGroup="$isGroup" :id="$receiverInfo->id" :profileImage="$receiverInfo->profile_image" :imageName="$receiverInfo->imageName()" :name="$receiverInfo->name" />
     
 </x-layout>
