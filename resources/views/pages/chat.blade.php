@@ -3,8 +3,8 @@
 @endphp
 
 <x-layout :page="$page">
-    <div class="grid justify-items-stretch text-slate-100">
-        <div class="justify-self-center mt-24 bg-slate-200 text-slate-800 py-10 px-7 md:px-16 w-4/5 md:w-auto">
+    <div class="max-w-2xl sm:mx-auto space-y-1 md:py-4 rounded mt-10 md:mt-5 mx-3">
+        <div class="p-5 bg-slate-300 shadow rounded-t-lg">
             @if ($isGroup)
                 <div class="text-right mb-3">
                     <a class="text-xl cursor-pointer" id="viewMembers"><i class="fa-solid fa-user-group"></i> {{count($receiverInfo->members)}}</a>
@@ -42,6 +42,7 @@
                             </div>
                         </div>
                     @endforeach
+                    
                     <div class="flex gap-3 py-5 px-10 flex-col">
                         <a class="font-bold hover:text-slate-700 cursor-pointer" id="addNewUser"><i class="fa-solid fa-user-plus"></i> Add User</a>
                         <div id="addForm" class="hidden">
@@ -76,7 +77,7 @@
 
             @endif
             
-            <div class=" border-b-2 border-slate-500 pb-3 ">
+            <div class="-500 pb-3 ">
                 {{-- header --}}
                
                 <div class="flex gap-3 justify-center">
@@ -110,85 +111,88 @@
                 </div>
 
             </div>
-            {{-- message body --}}
+        </div>
 
-            <div class="border-b-2 border-t-2 border-slate-500 p-10 w-full overflow-auto h-96 no-scrollbar" id="messageBody">
-                @unless (count($chats) == 0)
-                    @foreach ($chats as $chat)
+        {{-- message body --}}
+        <div class="p-5 sm:p-8 bg-slate-200 shadow overflow-auto h-96 no-scrollbar" id="messageBody">
+            @unless (count($chats) == 0)
+                @foreach ($chats as $chat)
 
-                        @php
-                            $now = new Carbon();
-                            $created_at = new Carbon($chat->created_at);
-                            $differenceInDays = $now->diffInDays($created_at->format('Y-m-d'));
-                        @endphp
+                    @php
+                        $now = new Carbon();
+                        $created_at = new Carbon($chat->created_at);
+                        $differenceInDays = $now->diffInDays($created_at->format('Y-m-d'));
+                    @endphp
 
-                        @if ($chat->sender->name == auth()->user()->name)
-                            <div id="options_{{$chat->chat_id}}" class="text-right selfOptions ease-in-out duration-300">
-                                <div class="">
-                                    <span class="cursor-pointer hover:text-slate-700" data-id="{{$chat->chat_id}}" onclick="edit(this)"><i class="fa-solid fa-pen"></i></span>
-                                    &emsp;<span class="cursor-pointer hover:text-red-800" data-id="{{$chat->chat_id}}" onclick="deleteMsg(this)"><i class="fa-regular fa-trash-can"></i></a>
-                                </div>
+                    @if ($chat->sender->name == auth()->user()->name)
+                        <div id="options_{{$chat->chat_id}}" class="text-right selfOptions ease-in-out duration-300">
+                            <div class="">
+                                <span class="cursor-pointer hover:text-slate-700" data-id="{{$chat->chat_id}}" onclick="edit(this)"><i class="fa-solid fa-pen"></i></span>
+                                &emsp;<span class="cursor-pointer hover:text-red-800" data-id="{{$chat->chat_id}}" onclick="deleteMsg(this)"><i class="fa-regular fa-trash-can"></i></a>
                             </div>
-                            <div id="{{"chat_" . $chat->chat_id}}" class="mb-5 text-right selfMessage ease-in-out duration-300">
-                                <div class="inline-block text-left bg-slate-900 text-slate-100 py-2 px-5 rounded">
-                                    <p class="block text-xs">{{$differenceInDays < 1 ? $chat->created_at->format('h:i A') : $created_at->format("m/d") . " " . $chat->created_at->format('h:i A') }}</p>
-                                    <p id="p_{{$chat->chat_id}}" class="block text-sm md:text-base">{{ $chat->message }}</p>
-                                </div>
+                        </div>
+                        <div id="{{"chat_" . $chat->chat_id}}" class="mb-5 text-right selfMessage ease-in-out duration-300">
+                            <div class="inline-block text-left bg-slate-900 text-slate-100 py-2 px-5 rounded">
+                                <p class="block text-xs">{{$differenceInDays < 1 ? $chat->created_at->format('h:i A') : $created_at->format("m/d") . " " . $chat->created_at->format('h:i A') }}</p>
+                                <p id="p_{{$chat->chat_id}}" class="block text-sm md:text-base">{{ $chat->message }}</p>
                             </div>
-                            <div class="mb-5 text-right hidden" id="form_{{$chat->chat_id}}">
-                                <div class="inline-block text-left py-2 px-5 rounded">
-                                    <input type="text" name="message" id="message_{{$chat->chat_id}}" class="rounded p-2 w-full mb-3">
-                                    <input data-id="{{$chat->chat_id}}" type="button" value="Update" class="bg-slate-900 hover:bg-slate-800 cursor-pointer text-slate-100 hover:text-white px-5 py-2 rounded" onclick="updateChat(this)">
-                                    <input data-id="{{$chat->chat_id}}" type="button" id="cancel_${chat.id}" value="Cancel" class="bg-slate-100 hover:bg-slate-50 cursor-pointer text-slate-900 hover:text-slate-800 px-5 py-2 rounded" onclick="cancelEdit(this)">
-                                </div>
+                        </div>
+                        <div class="mb-5 text-right hidden" id="form_{{$chat->chat_id}}">
+                            <div class="inline-block text-left py-2 px-5 rounded">
+                                <input type="text" name="message" id="message_{{$chat->chat_id}}" class="rounded p-2 w-full mb-3">
+                                <input data-id="{{$chat->chat_id}}" type="button" value="Update" class="bg-slate-900 hover:bg-slate-800 cursor-pointer text-slate-100 hover:text-white px-5 py-2 rounded" onclick="updateChat(this)">
+                                <input data-id="{{$chat->chat_id}}" type="button" id="cancel_${chat.id}" value="Cancel" class="bg-slate-100 hover:bg-slate-50 cursor-pointer text-slate-900 hover:text-slate-800 px-5 py-2 rounded" onclick="cancelEdit(this)">
                             </div>
-                        @else
-                            <div class="flex gap-3">
-                                <div>
-                                    @if (!$isGroup)
-                                        @if ($receiverInfo->profile_image)
-                                            <img class="h-10 md:h-16 w-12 md:w-16 object-cover rounded-full" src="{{ asset('storage/' . $receiverInfo->profile_image) }}" alt="Current profile photo" />
-                                        @else
-                                            <img class="h-10 md:h-16 w-12 md:w-16 object-cover rounded-full" src="https://via.placeholder.com/100/0f172a/ccc.png?text={{$receiverInfo->imageName()}}" alt="Current profile photo" />
-                                        @endif
-                                    @else
-                                        
-                                        @if ($chat->sender->profile_image)
-                                            <img class="h-10 md:h-16 w-12 md:w-16 object-cover rounded-full" src="{{ asset('storage/' . $chat->sender->profile_image) }}" alt="Current profile photo" />
-                                        @else
-                                            <img class="h-10 md:h-16 w-12 md:w-16 object-cover rounded-full" src="https://via.placeholder.com/100/0f172a/ccc.png?text={{$chat->sender->imageName()}}" alt="Current profile photo" />
-                                        @endif
-                                    @endif
-
-                                </div>
-            
-                                <div class="bg-slate-300 text-slate-900 px-5 py-2 rounded mb-5">
-                                    <p class="font-bold mb-2 ">{{ $isGroup ? $chat->sender->name : $receiverInfo->name }} <span class="text-xs"> {{$differenceInDays < 1 ? $chat->created_at->format('h:i A') : $created_at->format("m/d") . " " . $chat->created_at->format('h:i A') }}</span></p>
-                                    <p class=""><span class="text-sm md:text-base">{{ $chat->message }}</span></p>
-                                </div>
-                            </div>
-                       
-                        @endif
+                        </div>
                         
-                    @endforeach
-                @else
-                    @if (!$isGroup)
-                        <p class="">You're starting a new conversation with <span class="font-bold">{{$receiverInfo->name}}</span>.</p>
-                        <p class="">Type your first message below.</p>
-                    @else()
-                        <p class="">You are a member of this group chat <span class="font-bold">{{$receiverInfo->group_name}}</span>.</p>
-                        <p class="">Type your first message below.</p>
+                    @else
+                        <div class="flex gap-3">
+                            <div>
+                                @if (!$isGroup)
+                                    @if ($receiverInfo->profile_image)
+                                        <img class="h-10 md:h-16 w-12 md:w-16 object-cover rounded-full" src="{{ asset('storage/' . $receiverInfo->profile_image) }}" alt="Current profile photo" />
+                                    @else
+                                        <img class="h-10 md:h-16 w-12 md:w-16 object-cover rounded-full" src="https://via.placeholder.com/100/0f172a/ccc.png?text={{$receiverInfo->imageName()}}" alt="Current profile photo" />
+                                    @endif
+                                @else
+                                        
+                                    @if ($chat->sender->profile_image)
+                                        <img class="h-10 md:h-16 w-12 md:w-16 object-cover rounded-full" src="{{ asset('storage/' . $chat->sender->profile_image) }}" alt="Current profile photo" />
+                                    @else
+                                        <img class="h-10 md:h-16 w-12 md:w-16 object-cover rounded-full" src="https://via.placeholder.com/100/0f172a/ccc.png?text={{$chat->sender->imageName()}}" alt="Current profile photo" />
+                                    @endif
+                                @endif
+
+                            </div>
+            
+                            <div class="bg-slate-300 text-slate-900 px-5 py-2 rounded mb-5">
+                                <p class="font-bold mb-2 ">{{ $isGroup ? $chat->sender->name : $receiverInfo->name }} <span class="text-xs"> {{$differenceInDays < 1 ? $chat->created_at->format('h:i A') : $created_at->format("m/d") . " " . $chat->created_at->format('h:i A') }}</span></p>
+                                <p class=""><span class="text-sm md:text-base">{{ $chat->message }}</span></p>
+                            </div>
+                        </div>
+                       
                     @endif
-
+                        
+                @endforeach
+            @else
+                @if (!$isGroup)
+                    <p class="">You're starting a new conversation with <span class="font-bold">{{$receiverInfo->name}}</span>.</p>
+                    <p class="">Type your first message below.</p>
+                @else()
+                    <p class="">You are a member of this group chat <span class="font-bold">{{$receiverInfo->group_name}}</span>.</p>
+                    <p class="">Type your first message below.</p>
                 @endif
-            </div>
 
+            @endif
+        </div>
+
+        <div class="p-5 bg-slate-300 shadow rounded-b-lg">
             <div class="relative w-full my-3">
                 <input type="text" name="message" id="message"  class="block p-2.5 w-full z-20 text-sm text-gray-900 bg-gray-50 rounded-r-lg border-l-slate-800 border-2 border-slate-600 focus:ring-slate-900 focus:border-slate-800 " placeholder="Type a new message" required>
                 <button type="button" id="sendBtn" class="absolute top-0 right-0 p-2.5 text-sm font-medium text-white bg-slate-900 rounded-r-lg border border-slate-700 hover:bg-slate-800 focus:ring-4 focus:outline-none focus:ring-slate-300 "><i class="fa-regular fa-paper-plane w-5 h-5"></i></button>
             </div>
-            
-        </div>
+        </div> 
+
     </div>
 
     {{-- javascript components --}}

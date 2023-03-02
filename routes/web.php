@@ -35,9 +35,11 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/deleteChatMsg', [ChatController::class, 'deleteChatMsg'])->name('deleteChatMsg');
     Route::post('/addUserInAGroup/{group_id}', [ChatController::class, 'addUserInAGroup'])->name('addUserInAGroup');
     Route::delete('/leaveInAGroup/{group_id}', [ChatController::class, 'leaveInAGroup'])->name('leaveInAGroup');
+    Route::get('/profile', [UserController::class, 'profile'])->name('profile');
+    Route::put('/update-info', [UserController::class, 'updateProfile'])->name('updateProfile');
+    Route::put('/updateUserPassword', [UserController::class, 'updateUserPassword'])->name('updateUserPassword');
+    Route::delete('deleteUser', [UserController::class, 'deleteUser'])->name('deleteUser');
     Route::post('/fetchChat/{id}/{group?}', [ChatController::class, 'fetchChat'])->name('fetchChat');
     Route::post('/fetchChatPerUser', [ChatController::class, 'fetchChatPerUser'])->name('fetchChatPerUser');
     Route::post('/logout', [UserController::class, 'logout'])->name('logout');
-    //test for long polling
-    // Route::post('/longlooping/{id}/{group?}', [ChatController::class, 'longlooping'])->name('longlooping');
 });

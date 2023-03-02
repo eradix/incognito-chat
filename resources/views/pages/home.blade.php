@@ -1,10 +1,11 @@
 <x-layout :page="$page">
-    <div class="grid text-slate-100">
-        <div class="justify-self-center mt-24 bg-slate-200 text-slate-800 py-8 px-7 md:px-16 w-4/5 md:w-auto">
+    <div class="max-w-2xl sm:mx-auto space-y-1 md:py-4 rounded mt-10 md:mt-5 mx-3">
+        <div class="p-5 sm:p-8 bg-slate-300 shadow rounded-t-lg">
             <div class="text-right mb-3">
-                <a class="text-xl" href="{{ route('createGroup') }}"><i class="fa-solid fa-pen-to-square"></i></a>
+                <a class="text-xl hover:text-slate-700" href="{{ route('profile') }}"><i class="fa-solid fa-user-gear"></i></a>
+                <a class="text-xl hover:text-slate-700" href="{{ route('createGroup') }}"><i class="fa-solid fa-pen-to-square"></i></a>
             </div>
-            <div class="flex gap-4 border-b-2 border-slate-500 pb-3 ">
+            <div class="flex gap-4 pb-3 ">
                 {{-- header --}}
                
                 <div class="flex gap-3">
@@ -30,55 +31,52 @@
                     </form>
                 </div>
             </div>
-
-            {{-- messages per user and group --}}
-                <div id="userList" class="w-full overflow-auto h-96 no-scrollbar">
-                    @if ($otherUsersId)
-                        @foreach ($latest_messages as $chat)
-
-                        <a href="{{ route('showChat', [$chat['id'], $chat['group'] != '' ? 'group' : null ]) }}">
-                            <div class="flex hover:bg-slate-300 px-2"> 
-                                <div class="my-5 flex gap-3">
-                                    <div class="text-xl">
-                                        @if ($chat['profile_image'])
-                                            <img class="h-16 w-16 object-cover rounded-full" src="{{ asset('storage/' . $chat['profile_image']) }}" alt="Current profile photo" />
-                                        @else
-                                        <img class="h-16 w-16 object-cover rounded-full" src="https://via.placeholder.com/100/0f172a/ccc.png?text={{$chat['image_name']}}" alt="Current profile photo" />
-                                        @endif 
-
-                                    </div>
-                                    <div class="w-36 md:w-60">
-                                        <h3 class="font-bold text-base md:text-xl text-slate-700 truncate">{{$chat['name'] != "" ? $chat['name'] : $chat['group'] }}</h3>
-                                        <p class="{{ $chat['hasRead'] != '' ? 'font-bold' : ''  }} text-slate-700 truncate">{{ $chat['sender'] == 'self' ? "You: " . $chat['message'] : ($chat['sender'] != "" ? "{$chat['sender']}: {$chat['message']}" : $chat['message'] ) }}</p>
-                                    </div>
-                                                
-                                </div>
-
-                                @if ($chat['status'] == 1)
-                                    <div class="ml-auto my-5">
-                                        <p class="text-xs md:text-sm text-slate-600 tracking-tight mt-0.5">{{ $chat['created_at'] }}</p>
-                                        <h3 class="font-bold text-right mb-1"><i class="fa-solid fa-circle text-green-700 text-sm"></i></h3>
-                                        
-                                        
-                                    </div>
-                                @else
-                                <div class="ml-auto my-5 ">
-                                    <p class="text-xs md:text-sm text-slate-600 tracking-tight mt-0.5">{{ $chat['created_at'] }}</p>
-                                    <h3 class="font-bold text-right mb-1"><i class="fa-solid fa-circle text-slate-700 text-sm"></i></h3>
-                                    
-                                    
-                                </div>
-                                @endif
-                            </div>
-                        </a>
-                        @endforeach
-                    @else
-                        <p class="text-slate-200">No users available</p>
-                    @endif
-                </div>
-            
-        
         </div>
+
+        {{-- messages per user and group --}}
+        <div class="p-5 sm:p-8 bg-slate-200 shadow rounded-b-lg overflow-auto h-96 no-scrollbar" id="userList">
+
+            @if ($otherUsersId)
+                @foreach ($latest_messages as $chat)
+
+                    <a href="{{ route('showChat', [$chat['id'], $chat['group'] != '' ? 'group' : null ]) }}">
+                        <div class="hover:bg-slate-300 px-2 grid grid-cols-3 gap-4 ">
+                            <div class="my-5 flex col-span-2">
+                                <div class="text-xl pr-3 flex-none">
+                                    @if ($chat['profile_image'])
+                                        <img class="h-16 w-16 object-cover rounded-full" src="{{ asset('storage/' . $chat['profile_image']) }}" alt="Current profile photo" />
+                                    @else
+                                        <img class="h-16 w-16 object-cover rounded-full" src="https://via.placeholder.com/100/0f172a/ccc.png?text={{$chat['image_name']}}" alt="Current profile photo" />
+                                    @endif 
+                                </div>
+
+                                <div class="w-3/4 lg:w-80">
+                                    <h3 class="font-bold text-base md:text-xl text-slate-700 truncate">{{$chat['name'] != "" ? $chat['name'] : $chat['group'] }}</h3>
+                                    <p class="{{ $chat['hasRead'] != '' ? 'font-bold' : ''  }} text-slate-700 truncate">{{ $chat['sender'] == 'self' ? "You: " . $chat['message'] : ($chat['sender'] != "" ? "{$chat['sender']}: {$chat['message']}" : $chat['message'] ) }}</p>
+                                </div>
+                                                    
+                            </div>
+
+                            @if ($chat['status'] == 1)
+                                <div class="ml-auto my-5 flex-none">
+                                    <p class="text-xs md:text-sm text-slate-600 tracking-tight mt-0.5">{{ $chat['created_at'] }}</p>
+                                    <h3 class="font-bold text-right mb-1"><i class="fa-solid fa-circle text-green-700 text-sm"></i></h3>
+                                </div>
+                            @else
+                                <div class="ml-auto my-5  flex-none">
+                                    <p class="text-xs md:text-sm text-slate-600 tracking-tight mt-0.5">{{ $chat['created_at'] }}</p>
+                                    <h3 class="font-bold text-right mb-1"><i class="fa-solid fa-circle text-slate-700 text-sm"></i></h3>    
+                                </div>
+                            @endif
+                        </div>
+                    </a>
+                @endforeach
+
+            @else
+                <p class="text-slate-200">No users available</p>
+            @endif
+        </div>
+        
     </div>
 
     <script>
@@ -104,21 +102,21 @@
                             
                             $("#userList").append(`
                                 <a href="${url}">
-                                    <div class="flex hover:bg-slate-300 px-2">
-                                        <div class="my-5 flex gap-3">
-                                            <div class="text-xl">
+                                    <div class="hover:bg-slate-300 px-2 grid grid-cols-3 gap-4 ">
+                                        <div class="my-5 flex col-span-2">
+                                            <div class="text-xl pr-3 flex-none">
                                                 <img class="h-16 w-16 object-cover rounded-full" src="${profile_image}" alt="Current profile photo" />
                                                 
                                             </div>
 
-                                            <div class="w-36 md:w-60">
+                                            <div class="w-3/4 lg:w-80">
                                                 <h3 class="font-bold text-base md:text-xl text-slate-700 truncate"> ${chat['name'] != '' ? chat['name'] : chat['group'] }</h3>
                                                 <p class="${chat['hasRead'] != '' ? 'font-bold' : '' } text-slate-700 truncate">${(chat['sender'] == 'self') ? "You: " + chat['message'] : (chat['sender'] != "" ? chat['sender'] + ": " + chat['message'] : chat['message'])  }</p>
                                             </div>
                                             
                                         </div>
                                                                                 
-                                        <div class="ml-auto my-5">
+                                        <div class="ml-auto my-5 ">
                                                 <p class="text-xs md:text-sm text-slate-600 tracking-tight mt-0.5"> ${chat['created_at']}</p>
                                                 ${(chat['status'] == 1) ? '<h3 class="font-bold text-right mb-1"><i class="fa-solid fa-circle text-green-700 text-sm"></i></h3>' : '<h3 class="font-bold text-right mb-1"><i class="fa-solid fa-circle text-slate-700 text-sm"></i></h3>'}
                                             </div>

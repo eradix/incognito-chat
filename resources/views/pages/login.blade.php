@@ -1,12 +1,12 @@
 <x-layout :page="$page">
-    <div class="grid justify-items-stretch text-slate-100">
-        <div class="justify-self-center mt-24 bg-slate-200 text-slate-800 py-10 px-7 md:px-16 w-4/5 md:w-auto">
+    <div class="max-w-xl sm:mx-auto space-y-3 md:py-4 rounded mt-10 md:mt-0 mx-3">
+        <div class="p-5 sm:p-20 bg-slate-300 shadow rounded-lg">
             <h1 class="font-bold mb-4 text-2xl md:text-3xl"><i class="fa-regular fa-message"></i> Incognito Chat App</h1>
             <form action="{{ route('authenticateUser') }}" method="post">
                 @csrf
 
                 @error('invalid')
-                    <div class="my-3" role="alert">
+                    <div class="my-3 text-red-800" role="alert">
                         {{ $message }}
                     </div>
                 @enderror

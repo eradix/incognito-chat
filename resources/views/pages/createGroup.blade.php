@@ -1,6 +1,6 @@
 <x-layout :page="$page">
     <div class="grid justify-items-stretch text-slate-100">
-        <div class="justify-self-center mt-24 bg-slate-200 text-slate-800 py-10 px-7 md:px-16 w-4/5 md:w-auto">
+        <div class="justify-self-center mt-24 bg-slate-200 text-slate-800 py-10 px-7 md:px-16 w-4/5 md:w-auto rounded">
             <h1 class="font-bold mb-4 text-2xl md:text-3xl"><i class="fa-regular fa-message"></i> Create a group chat</h1>
             <form action="{{ route('storeGroup') }}" method="post">
                 @csrf

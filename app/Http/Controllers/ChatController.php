@@ -269,6 +269,7 @@ class ChatController extends Controller
         ]);
     }
 
+    //store a new groupchat along with its members
     public function storeGroup(Request $request)
     {
         $formData = $request->validate(
