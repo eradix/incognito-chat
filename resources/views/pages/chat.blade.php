@@ -204,6 +204,6 @@
     <x-scripts.fetch-chat :isGroup="$isGroup" :id="$receiverInfo->id" />
 
     {{-- component for checking realtime chats in db, edit and deleting chats --}}
-    <x-scripts.edit-delete :isGroup="$isGroup" :id="$receiverInfo->id" :profileImage="$receiverInfo->profile_image" :imageName="$receiverInfo->imageName()" :name="$receiverInfo->name" />
+    <x-scripts.edit-delete :isGroup="$isGroup" :id="$receiverInfo->id" :profileImage="$receiverInfo->profile_image" :imageName="$receiverInfo->imageName()" :name="$receiverInfo->name" :group="$receiverInfo->group_name" />
     
 </x-layout>

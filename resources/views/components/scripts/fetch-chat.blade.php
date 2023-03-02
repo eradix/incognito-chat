@@ -30,6 +30,8 @@
             success: function (response) {
                 $("#message").val("");
 
+                if($("#messageBody > p").text()) $("#messageBody > p").empty();
+
                 let chat = response.chat;
 
                 let hoursMin = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });

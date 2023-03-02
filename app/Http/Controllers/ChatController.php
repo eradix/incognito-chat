@@ -462,27 +462,45 @@ class ChatController extends Controller
 
         foreach ($user_group as $group) {
             $group_msg =  $group->chat()->latest()->first();
-
-            $now = new Carbon();
-            $created_at = new Carbon($group_msg->created_at);
-            $differenceInDays = $now->diffInDays($created_at->format('Y/m/d'));
             $members = $group->members;
+            if ($group_msg) {
 
-            $group_arr = [
-                'group' => $group->group_name,
-                'name' => '',
-                'status' => $members->contains(function ($user) use ($user_id) {
-                    return $user->status == 1 && $user->id != $user_id;
-                }),
-                'message' => $group_msg->message,
-                'sender' => $group_msg->sender_id == $user_id ? "self" : User::find($group_msg->sender_id)->name,
-                'id' => $group->id, //id of group
-                'created_at' => $differenceInDays < 1 ? $group_msg->created_at->format('h:i A') : $created_at->format("m/d"),
-                'orig_date' =>  $group_msg->created_at,
-                'profile_image' => '',
-                'image_name' => $group->imageName(),
-                'hasRead' => (!in_array($user_id, explode(",", $group_msg->groupRead)) &&  $group_msg->sender_id != $user_id) ? "unread" : "",
-            ];
+                $now = new Carbon();
+                $created_at = new Carbon($group_msg->created_at);
+                $differenceInDays = $now->diffInDays($created_at->format('Y/m/d'));
+
+                $group_arr = [
+                    'group' => $group->group_name,
+                    'name' => '',
+                    'status' => $members->contains(function ($user) use ($user_id) {
+                        return $user->status == 1 && $user->id != $user_id;
+                    }),
+                    'message' => $group_msg->message,
+                    'sender' => $group_msg->sender_id == $user_id ? "self" : User::find($group_msg->sender_id)->name,
+                    'id' => $group->id, //id of group
+                    'created_at' => $differenceInDays < 1 ? $group_msg->created_at->format('h:i A') : $created_at->format("m/d"),
+                    'orig_date' =>  $group_msg->created_at,
+                    'profile_image' => '',
+                    'image_name' => $group->imageName(),
+                    'hasRead' => (!in_array($user_id, explode(",", $group_msg->groupRead)) &&  $group_msg->sender_id != $user_id) ? "unread" : "",
+                ];
+            } else {
+                $group_arr = [
+                    'group' => $group->group_name,
+                    'name' => '',
+                    'status' => $members->contains(function ($user) use ($user_id) {
+                        return $user->status == 1 && $user->id != $user_id;
+                    }),
+                    'message' => "",
+                    'sender' => "",
+                    'id' => $group->id, //id of group
+                    'created_at' => "",
+                    'orig_date' =>  "",
+                    'profile_image' => '',
+                    'image_name' => $group->imageName(),
+                    'hasRead' => "",
+                ];
+            }
 
             $latest_messages[] =  $group_arr;
         }
